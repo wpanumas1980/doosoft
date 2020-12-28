@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -8,6 +8,9 @@ import Container from '@material-ui/core/Container';
 import pg from '../../../img/pg.png';
 import logo from '../../../img/logo.png';
 import { makeStyles } from '@material-ui/core/styles';
+import UserContext from '../../components/UserContext/UserContext';
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 
 
 const useStyles = makeStyles(() => ({
@@ -47,17 +50,20 @@ export default function SignUp() {
     const classes = useStyles();
 
     const [fname, setFname] = useState('');
-    const [sname, setSname] = useState('');
+    const [lname, setLname] = useState('');
     const [address, setAdress] = useState('');
     const [tel, setTel] = useState('');
-    const [email, setEmail] = useState('');
     const [check, setCheck] = useState(false);
+
+    const { email, setEmail } = useContext(UserContext);
+
+    const history = useHistory();
 
     const handleFname = (e) => {
         setFname(e.target.value);
     }
-    const handleSname = (e) => {
-        setSname(e.target.value);
+    const handleLname = (e) => {
+        setLname(e.target.value);
     }
     const handleAdress = (e) => {
         setAdress(e.target.value);
@@ -71,6 +77,21 @@ export default function SignUp() {
     const handleCheck = (e) => {
         setCheck(e.target.checked);
     }
+
+    const onFinish = async () => {
+        const qrUrl =`https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${email}`;
+        const userData = { fname, lname, address, tel, email,qrUrl };
+        
+        await axios.post("http://localhost:5555/register", userData)
+            .then(res => {
+                alert('Singup complete...');
+                history.push('/complete');
+            })
+            .catch(err => {
+                alert('Something went wrong!!!');
+            });
+    };
+
     return (
         <div style={{ background: '#232323' }}>
             <Container maxWidth="lg" >
@@ -108,7 +129,7 @@ export default function SignUp() {
                                     label="Surame"
                                     name="lastName"
                                     autoComplete="lname"
-                                    onChange={handleSname}
+                                    onChange={handleLname}
                                 />
                                 <TextField
                                     className={classes.input}
@@ -153,9 +174,9 @@ export default function SignUp() {
                                         labelStyle={{ color: 'white' }}
                                         iconStyle={{ fill: 'white' }}
                                         inputStyle={{ color: 'white' }}
-                                        style={{ color: 'white' }} 
+                                        style={{ color: 'white' }}
                                         onChange={handleCheck}
-                                        />}
+                                    />}
                                     label="I accept Doosoft terms of service, community guidelines and privacy policy."
                                 />
                                 <Grid container justify='center'>
@@ -165,7 +186,7 @@ export default function SignUp() {
                                 </Button>
                                     </Grid>
                                     <Grid item>
-                                        <Button variant="contained" className={classes.submit} style={{ color: 'white' }}>
+                                        <Button disabled={!check} variant="contained" className={classes.submit} style={{ color: 'white' }} onClick={onFinish}>
                                             CONTINUE
                             </Button>
                                     </Grid>

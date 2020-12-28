@@ -1,11 +1,12 @@
-import React from 'react';
-import Grid from '@material-ui/core/Grid';
+import React,{useEffect,useState, useContext} from 'react';
 import Container from '@material-ui/core/Container';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 import PermIdentityOutlinedIcon from '@material-ui/icons/PermIdentityOutlined';
 import { Box, makeStyles } from '@material-ui/core';
 import logo from '../../../img/logo.png'
+import UserContext from '../../components/UserContext/UserContext'
+import axios from 'axios';
 const useStyles = makeStyles(() => ({
     root: {
         height: '100vh',
@@ -29,9 +30,31 @@ const useStyles = makeStyles(() => ({
 
 export default function Home() {
     const classes = useStyles();
+    const [user, setUser] = useState({});
+    const { email } = useContext(UserContext);
+    
+    const getUser = async () =>{
+       await axios.get(`http://localhost:5555/getUserByEmail/${email}`)
+        .then(res => {
+            setUser(res.data);
+        })
+        .catch(err => {
+            alert('Something went wrong!!!');
+        });
+    }
 
+    useEffect(() => {
+        getUser();
+    }, [])
+
+    if(!user){
+        return<h1>Loading ....</h1>
+    }
+
+    console.log(email);
+    console.log(user);
     return (
-        <div  >
+        <div>
             <Container maxWidth="md" className={classes.root} >
                 <Box className={classes.user}>
                     <Avatar >
@@ -70,7 +93,7 @@ export default function Home() {
                     </div>
                     <div>
                         <img
-                            src={logo}
+                            src={user.qrUrl}
                             alt='logo'
                         />
                     </div>
